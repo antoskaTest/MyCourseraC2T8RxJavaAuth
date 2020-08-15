@@ -1,5 +1,6 @@
 package com.courseraandroid.myfirstappcoursera;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +29,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
@@ -51,6 +56,7 @@ public class AuthFragment extends Fragment {
     }
 
     private View.OnClickListener mOnEnterClickListener = new View.OnClickListener() {
+        @SuppressLint("CheckResult")
         @Override
         public void onClick(View view) {
             if (isEmailValid() && isPasswordValid()) {
@@ -59,7 +65,28 @@ public class AuthFragment extends Fragment {
                         mPassword.getText().toString(),
                         true);
                 ApiUtils.resetRetrofit();
-                ApiUtils.getApi().authentication().enqueue(new Callback<UserForAuth>() {
+                ApiUtils.getApi().authentication()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Consumer<User>() {
+                            @Override
+                            public void accept(User user) throws Exception {
+                                if(user != null && user instanceof User){
+                                   showMessage(R.string.auth);
+                                }
+                                else {
+                                    showMessage(R.string.auth_error);
+                                }
+                                startActivity(new Intent(getActivity(), AlbumsActivity.class));
+                                getActivity().finish();
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable throwable) throws Exception {
+                                showMessage(R.string.request_error);
+                            }
+                        });
+                        /*.enqueue(new Callback<UserForAuth>() {
                     Handler handler = new Handler(getActivity().getMainLooper());
 
                     @Override
@@ -103,7 +130,7 @@ public class AuthFragment extends Fragment {
                             }
                         });
                     }
-                });
+                });*/
 
             } else {
                 showMessage(R.string.input_error);
