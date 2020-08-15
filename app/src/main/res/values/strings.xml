@@ -20,4 +20,5 @@
     <string name="albums">Альбомы</string>
     <string name="error_500">Внутреняя ошибка сервера</string>
     <string name="error_400">Ошибка валидации</string>
+    <string name="auth">Пользователь авторизован</string>
 </resources>

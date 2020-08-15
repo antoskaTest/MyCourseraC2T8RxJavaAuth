@@ -7,6 +7,8 @@ import com.courseraandroid.myfirstappcoursera.model.Songs;
 import com.courseraandroid.myfirstappcoursera.model.User;
 import com.courseraandroid.myfirstappcoursera.model.UserForAuth;
 
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -15,10 +17,11 @@ import retrofit2.http.Path;
 
 public interface AcademyApi {
     @POST("registration")
-    Call<Void> registration(@Body User user);
+    Completable registration(@Body User user);
 
     @GET("user")
-    Call<UserForAuth> authentication();
+    Single<User> authentication();
+    //Call<UserForAuth> authentication();
 
     @GET("albums")
     Call<Albums> getAlbums();
