@@ -60,7 +60,7 @@ public class AuthFragment extends Fragment {
         @Override
         public void onClick(View view) {
             if (isEmailValid() && isPasswordValid()) {
-
+                //клиент для имитации авторизации
                 OkHttpClient client = ApiUtils.getBasicAuthClient(mLogin.getText().toString(),
                         mPassword.getText().toString(),
                         true);
@@ -86,52 +86,6 @@ public class AuthFragment extends Fragment {
                                 showMessage(R.string.request_error);
                             }
                         });
-                        /*.enqueue(new Callback<UserForAuth>() {
-                    Handler handler = new Handler(getActivity().getMainLooper());
-
-                    @Override
-                    public void onResponse(Call<UserForAuth> call, Response<UserForAuth> response) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!response.isSuccessful()) {
-                                    showMessage(R.string.auth_error);
-
-                                } else {
-                                    try {
-                                        //Gson gson = new Gson();
-                                        //JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-                                        //User user = gson.fromJson(json.get("data"), User.class);
-
-                                        //UserForAuth userForAuth = response.body();
-                                        //User user = new User(userForAuth.getData().getEmail(), userForAuth.getData().getName(), "");
-
-                                       // Intent startProfileIntent =
-                                       //         new Intent(getActivity(), ProfileActivity.class);
-                                        //startProfileIntent.putExtra(ProfileActivity.USER_KEY, user);
-                                        //startActivity(startProfileIntent);
-                                        startActivity(new Intent(getActivity(), AlbumsActivity.class));
-                                        getActivity().finish();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        System.out.println("EXcEPTION");
-                                    }
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Call<UserForAuth> call, Throwable t) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                showMessage(R.string.request_error);
-                            }
-                        });
-                    }
-                });*/
-
             } else {
                 showMessage(R.string.input_error);
             }
