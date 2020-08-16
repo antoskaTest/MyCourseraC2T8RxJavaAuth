@@ -1,5 +1,6 @@
 package com.courseraandroid.myfirstappcoursera.albums;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,11 @@ import com.courseraandroid.myfirstappcoursera.R;
 import com.courseraandroid.myfirstappcoursera.album.DetailAlbumFragment;
 import com.courseraandroid.myfirstappcoursera.model.Albums;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -69,34 +75,43 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
     @Override
     public void onRefresh() {
         mRefresher.post(() -> {
-            mRefresher.setRefreshing(true);
+            //mRefresher.setRefreshing(true);
             getAlbums();
         });
     }
 
+    @SuppressLint("CheckResult")
     private void getAlbums() {
 
-        ApiUtils.getApi().getAlbums().enqueue(new Callback<Albums>() {
-            @Override
-            public void onResponse(Call<Albums> call, Response<Albums> response) {
-                if (response.isSuccessful()) {
-                    mErrorView.setVisibility(View.GONE);
-                    mRecyclerView.setVisibility(View.VISIBLE);
-                    mAlbumAdapter.addData(response.body().getData(), true);
-                } else {
-                    mErrorView.setVisibility(View.VISIBLE);
-                    mRecyclerView.setVisibility(View.GONE);
-                }
-                mRefresher.setRefreshing(false);
-            }
-
-            @Override
-            public void onFailure(Call<Albums> call, Throwable t) {
-                mErrorView.setVisibility(View.VISIBLE);
-                mRecyclerView.setVisibility(View.GONE);
-                mRefresher.setRefreshing(false);
-            }
-        });
-    }
-
+        ApiUtils.getApi()
+                .getAlbums()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(Disposable disposable) throws Exception {
+                        mRefresher.setRefreshing(true);
+                    }
+                })
+                .doFinally(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        mRefresher.setRefreshing(false);
+                    }
+                })
+                .subscribe(new Consumer<Albums>() {
+                    @Override
+                    public void accept(Albums albums) throws Exception {
+                        mErrorView.setVisibility(View.GONE);
+                        mRecyclerView.setVisibility(View.VISIBLE);
+                        mAlbumAdapter.addData(albums.getData(), true);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        mErrorView.setVisibility(View.VISIBLE);
+                        mRecyclerView.setVisibility(View.GONE);
+                    }
+                });
+        }
 }
